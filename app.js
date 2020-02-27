@@ -1,5 +1,6 @@
 var bodyParser 		= require("body-parser"),
 	methodOverride 	= require("method-override"),
+	expressSanitizer= require("express-sanitizer"),
 	mongoose 		= require("mongoose"),
 	express 		= require("express"),
 	app 			= express();
@@ -10,7 +11,9 @@ mongoose.connect("mongodb://localhost/restful_blog_app", {useNewUrlParser: true,
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(methodOverride("_method"))
+app.use(expressSanitizer);
+app.use(methodOverride("_method"));
+
 
 // MONGOOSE/MODEL CONGIG
 var blogSchema = new mongoose.Schema({
@@ -25,6 +28,7 @@ var Blog = mongoose.model("Blog", blogSchema);
 // 	image: "https://images.unsplash.com/photo-1513754537542-f85cde07305a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=600&q=60",
 // 	body: "This is a blog post!!!"
 // })
+//----------------------------------------------------------------------------------
 
 // RESTFUL ROUTES
 app.get("/", function(req, res){
@@ -50,6 +54,7 @@ app.get("/blogs/new", function(req, res){
 // CREATE ROUTE
 app.post("/blogs", function(req, res){
 	//create blogs
+	req.body.blog.blog = req.sanitize(req.body.blog.blog)
 	Blog.create(req.body.blog, function(err, newBlog){
 		if(err){
 			res.render("new");
